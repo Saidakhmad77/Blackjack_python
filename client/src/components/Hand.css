@@ -1,0 +1,29 @@
+.hand-container {
+    margin-bottom: 20px;
+    padding: 10px;
+    border-radius: 10px;
+    background-color: #2c3e50; /* A dark background for contrast */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hand-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ecf0f1; /* Light text color */
+    margin-bottom: 10px;
+}
+
+.cards-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start; /* Aligns the cards in a row */
+    flex-wrap: wrap; /* Allows cards to wrap to the next line if needed */
+}
+
+.cards-row .card {
+    transition: transform 0.3s ease;
+}
+
+.cards-row .card:hover {
+    transform: translateY(-5px); /* Slight lift effect on hover */
+}
