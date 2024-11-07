@@ -1,7 +1,6 @@
-import React from 'react';
 import BlackjackGame from './components/BlackjackGame';
 import { ThemeProvider } from '@mui/material/styles';
-import theme from './theme'; // Optional custom theme
+import theme from './theme';
 
 function App() {
     return (

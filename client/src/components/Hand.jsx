@@ -1,6 +1,5 @@
-import React from 'react';
 import Card from './Card';
-import './Hand.css'; // For hand-specific styles
+import './Hand.css';
 
 const Hand = ({ cards, owner }) => (
     <div className="hand-container">

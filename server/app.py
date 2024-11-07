@@ -111,5 +111,11 @@ def get_player_hand():
 def get_dealer_hand():
     return jsonify(game.dealer_hand.serialize())
 
+@app.route('/deal-card-to-dealer', methods=['GET'])
+def deal_card_to_dealer():
+    card = game.deal_card_to_dealer()
+    return jsonify({'rank': card.rank, 'suit': card.suit})
+
+
 if __name__ == '__main__':
     app.run(debug=True)
