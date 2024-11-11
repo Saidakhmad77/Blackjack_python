@@ -1,10 +1,9 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from logic import BlackjackGame
+from logic import BlackjackGame, serialize_card
 
 app = Flask(__name__)
 CORS(app)
-
 
 game = BlackjackGame()
 
@@ -21,15 +20,16 @@ def start_game():
 @app.route('/deal-card', methods=['GET'])
 def deal_card():
     card = game.deal_card_to_player()
-    game.player_hand.add_card(card)
-    return jsonify({'rank': card.rank, 'suit': card.suit})
+    if card is None:
+        return jsonify({'error': 'No more cards in the deck'}), 400
+    return jsonify(serialize_card(card))
 
 @app.route('/deal-card-to-dealer', methods=['GET'])
 def deal_card_to_dealer():
     card = game.deal_card_to_dealer()
     if card is None:
-        return jsonify({'error': 'No more cards in the deck'}), 400  # Return an appropriate error response if no card is left
-    return jsonify({'rank': card.rank, 'suit': card.suit})
+        return jsonify({'error': 'No more cards in the deck'}), 400
+    return jsonify(serialize_card(card))
 
 @app.route('/get-player-hand', methods=['GET'])
 def get_player_hand():

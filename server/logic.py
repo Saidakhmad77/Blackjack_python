@@ -61,7 +61,7 @@ class Hand:
         return self.calculate_value() > 21
     
     def serialize(self):
-        return [{'rank': card.rank, 'suit': card.suit} for card in self.cards]
+        return [serialize_card(card) for card in self.cards]  # Use serialize_card function
 
 class BlackjackGame:
     def __init__(self):
@@ -80,3 +80,11 @@ class BlackjackGame:
 
     def deal_card_to_dealer(self):
         return self.deck.deal_card()
+
+# Standalone serialize_card function
+def serialize_card(card):
+    return {
+        'rank': card.rank,
+        'suit': card.suit,
+        'value': card.value()
+    }

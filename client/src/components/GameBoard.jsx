@@ -17,6 +17,7 @@ const GameBoard = () => {
     const [gameState, setGameState] = useState('READY'); // 'READY', 'PLAYING', 'PLAYER_WIN', 'DEALER_WIN', etc.
     const [playerScore, setPlayerScore] = useState(0);
     const [dealerScore, setDealerScore] = useState(0);
+    const [showDealerHand, setShowDealerHand] = useState(false); // State to control when to show dealer's hand and score
 
     useEffect(() => {
         if (Array.isArray(playerHand)) {
@@ -25,7 +26,7 @@ const GameBoard = () => {
 
             if (score > 21) {
                 setGameState('PLAYER_BUST');
-                handleStand(); // Automatically end the game if the player busts
+                revealDealerHand();
             }
         }
 
@@ -40,6 +41,9 @@ const GameBoard = () => {
             setPlayerHand(response.data.player_hand);
             setDealerHand([response.data.dealer_hand[0]]); // Show only one dealer card initially
             setGameState('PLAYING');
+            setShowDealerHand(false);
+            setPlayerScore(0);
+            setDealerScore(0);
         } catch (error) {
             console.error('Error starting the game:', error);
         }
@@ -56,7 +60,7 @@ const GameBoard = () => {
             const newScore = calculateScore(newHand);
             if (newScore > 21) {
                 setGameState('PLAYER_BUST');
-                handleStand(); // Automatically end the game if the player busts
+                revealDealerHand();
             }
         } catch (error) {
             console.error('Error dealing card to player:', error);
@@ -69,13 +73,14 @@ const GameBoard = () => {
         try {
             const response = await getDealerHand();
             setDealerHand(response.data);
+            setShowDealerHand(true);
 
             let currentDealerScore = calculateScore(response.data);
             while (currentDealerScore < 17) {
                 const cardResponse = await dealCardToDealer();
                 if (cardResponse.data.error) {
                     console.error('Deck is empty:', cardResponse.data.error);
-                    setGameState('DEALER_WIN'); // Handle scenario where the deck is empty
+                    setGameState('DEALER_WIN');
                     return;
                 }
 
@@ -83,15 +88,29 @@ const GameBoard = () => {
                 setDealerHand(newHand);
                 currentDealerScore = calculateScore(newHand);
 
+                if (currentDealerScore >= 17) {
+                    break;
+                }
+
                 if (currentDealerScore > 21) {
                     setGameState('DEALER_BUST');
-                    return; // End the game if the dealer busts
+                    return;
                 }
             }
 
             determineWinner();
         } catch (error) {
             console.error('Error during stand action:', error);
+        }
+    };
+
+    const revealDealerHand = async () => {
+        try {
+            const response = await getDealerHand();
+            setDealerHand(response.data);
+            setShowDealerHand(true);
+        } catch (error) {
+            console.error('Error revealing dealer hand:', error);
         }
     };
 
@@ -104,15 +123,14 @@ const GameBoard = () => {
         let total = 0;
         let aces = 0;
         hand.forEach(card => {
-            if (card && card.rank && card.suit) {
-                total += card.value || 0;
+            if (card && typeof card.value === 'number') {
+                total += card.value;
             } else {
                 console.warn('Invalid card or card value:', card);
             }
             if (card.rank === 'A') aces += 1;
         });
 
-        // Adjust for aces if total is over 21
         while (total > 21 && aces > 0) {
             total -= 10;
             aces -= 1;
@@ -141,8 +159,12 @@ const GameBoard = () => {
     return (
         <div>
             <h1>Blackjack</h1>
+            <h3>Player's Score: {playerScore}</h3>
             <Hand cards={Array.isArray(playerHand) ? playerHand : []} owner="Player" />
-            <Hand cards={Array.isArray(dealerHand) ? dealerHand : []} owner="Dealer" />
+
+            {showDealerHand && <h3>Dealer's Score: {dealerScore}</h3>}
+            <Hand cards={showDealerHand ? dealerHand : [dealerHand[0]]} owner="Dealer" />
+
             <ButtonContainer>
                 {gameState === 'READY' && (
                     <Button variant="contained" color="primary" onClick={handleStartGame}>
