@@ -17,7 +17,7 @@ const GameBoard = () => {
     const [gameState, setGameState] = useState('READY'); // 'READY', 'PLAYING', 'PLAYER_WIN', 'DEALER_WIN', etc.
     const [playerScore, setPlayerScore] = useState(0);
     const [dealerScore, setDealerScore] = useState(0);
-    const [showDealerHand, setShowDealerHand] = useState(false); // State to control when to show dealer's hand and score
+    const [showDealerHand, setShowDealerHand] = useState(false);
 
     useEffect(() => {
         if (Array.isArray(playerHand)) {
