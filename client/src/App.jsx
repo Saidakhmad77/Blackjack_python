@@ -1,12 +1,12 @@
-import BlackjackGame from './components/BlackjackGame';
 import { ThemeProvider } from '@mui/material/styles';
 import theme from './theme';
+import GameBoard from './components/GameBoard';
 
 function App() {
     return (
         <ThemeProvider theme={theme}>
             <div className="App">
-                <BlackjackGame />
+                <GameBoard />
             </div>
         </ThemeProvider>
     );
