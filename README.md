@@ -1,3 +1,4 @@
+
 # Blackjack Python
 
 Welcome to the **Blackjack Game** project! This repository contains a Python implementation of the classic Blackjack card game. Designed to simulate the experience of playing Blackjack in a casino, this project includes three unique versions of the game to explore different coding approaches and game mechanics.
@@ -12,7 +13,6 @@ Welcome to the **Blackjack Game** project! This repository contains a Python imp
 - [Future Enhancements](#future-enhancements)
 - [Technologies Used](#technologies-used)
 - [Contributing](#contributing)
-- [License](#license)
 
 ## Project Overview
 
@@ -35,28 +35,38 @@ Welcome to the **Blackjack Game** project! This repository contains a Python imp
    ```bash
    git clone https://github.com/Saidakhmad77/Blackjack_python.git
    cd Blackjack_python
-Run the game:
-bash
-Copy code
-python blackjack_game.py
-(Replace blackjack_game.py with the actual filename for the main script of each implementation, if different.)
-How to Play
-Objective: Get as close to 21 as possible without going over.
-Gameplay:
-Each player is dealt two cards.
-Players can choose to "Hit" (draw another card) or "Stand" (end their turn).
-The dealer also draws cards, following a specific set of rules.
-The player with the closest score to 21 without exceeding it wins the round.
-Future Enhancements
-Graphical User Interface (GUI): Build a visually appealing frontend for the game using React, making it more interactive and enjoyable.
-Score Tracking: Implement local storage to save player scores and display high scores on the frontend.
-Technologies Used
-Python: Core language used to build game logic and functionality.
-Contributing
+   ```
+
+2. Run the game:
+   ```bash
+   python blackjack_game.py
+   ```
+   *(Replace `blackjack_game.py` with the actual filename for the main script of each implementation, if different.)*
+
+## How to Play
+
+1. **Objective**: Get as close to 21 as possible without going over.
+2. **Gameplay**:
+   - Each player is dealt two cards.
+   - Players can choose to "Hit" (draw another card) or "Stand" (end their turn).
+   - The dealer also draws cards, following a specific set of rules.
+   - The player with the closest score to 21 without exceeding it wins the round.
+
+## Future Enhancements
+
+- **Graphical User Interface (GUI)**: Build a visually appealing frontend for the game using React, making it more interactive and enjoyable.
+- **Score Tracking**: Implement local storage to save player scores and display high scores on the frontend.
+
+## Technologies Used
+
+- **Python**: Core language used to build game logic and functionality.
+
+## Contributing
+
 Contributions are welcome! If you’d like to improve the game or add new features, please fork the repository and submit a pull request.
 
-Fork the repository
-Create your feature branch: git checkout -b feature/YourFeature
-Commit your changes: git commit -m 'Add some feature'
-Push to the branch: git push origin feature/YourFeature
-Open a pull request
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/YourFeature`
+3. Commit your changes: `git commit -m 'Add some feature'`
+4. Push to the branch: `git push origin feature/YourFeature`
+5. Open a pull request
