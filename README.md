@@ -39,9 +39,9 @@ Welcome to the **Blackjack Game** project! This repository contains a Python imp
 
 2. Run the game:
    ```bash
-   python blackjack_game.py
+   python app.py
    ```
-   *(Replace `blackjack_game.py` with the actual filename for the main script of each implementation, if different.)*
+   
 
 ## How to Play
 
