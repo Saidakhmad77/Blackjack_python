@@ -1,15 +1,19 @@
-import { ThemeProvider } from '@mui/material/styles';
-import theme from './theme';
+import React, { useState } from 'react';
+import LandingPage from './components/LandingPage';
 import GameBoard from './components/GameBoard';
 
-function App() {
+const App = () => {
+    const [gameStarted, setGameStarted] = useState(false);
+
+    const handleStartGame = () => {
+        setGameStarted(true);
+    };
+
     return (
-        <ThemeProvider theme={theme}>
-            <div className="App">
-                <GameBoard />
-            </div>
-        </ThemeProvider>
+        <div>
+            {gameStarted ? <GameBoard /> : <LandingPage onStart={handleStartGame} />}
+        </div>
     );
-}
+};
 
 export default App;

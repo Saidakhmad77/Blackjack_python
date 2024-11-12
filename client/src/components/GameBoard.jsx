@@ -1,23 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import Hand from './Hand';
-import { startGame, dealCard, dealCardToDealer, getDealerHand } from '../services/api';
+import { startGame, dealCard, dealCardToDealer } from '../services/api';
 import Button from '@mui/material/Button';
-import styled from 'styled-components';
-
-const ButtonContainer = styled.div`
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    margin-top: 20px;
-`;
+import './GameBoard.css';
 
 const GameBoard = () => {
     const [playerHand, setPlayerHand] = useState([]);
     const [dealerHand, setDealerHand] = useState([]);
-    const [gameState, setGameState] = useState('READY'); // 'READY', 'PLAYING', 'PLAYER_WIN', 'DEALER_WIN', etc.
+    const [gameState, setGameState] = useState('PLAYING');
     const [playerScore, setPlayerScore] = useState(0);
     const [dealerScore, setDealerScore] = useState(0);
     const [showDealerHand, setShowDealerHand] = useState(false);
+    const [winnerMessage, setWinnerMessage] = useState('');
+
+    // Automatically start the game on load
+    useEffect(() => {
+        handleStartGame();
+    }, []);
 
     useEffect(() => {
         if (Array.isArray(playerHand)) {
@@ -26,6 +25,7 @@ const GameBoard = () => {
 
             if (score > 21) {
                 setGameState('PLAYER_BUST');
+                setWinnerMessage('Dealer Wins! You went over 21.');
                 revealDealerHand();
             }
         }
@@ -39,11 +39,12 @@ const GameBoard = () => {
         try {
             const response = await startGame();
             setPlayerHand(response.data.player_hand);
-            setDealerHand([response.data.dealer_hand[0]]); // Show only one dealer card initially
+            setDealerHand([response.data.dealer_hand[0]]);
             setGameState('PLAYING');
             setShowDealerHand(false);
             setPlayerScore(0);
             setDealerScore(0);
+            setWinnerMessage('');
         } catch (error) {
             console.error('Error starting the game:', error);
         }
@@ -51,6 +52,13 @@ const GameBoard = () => {
 
     const handleHit = async () => {
         if (gameState !== 'PLAYING') return;
+
+        if (playerHand.length >= 5) {
+            setGameState('PLAYER_BUST');
+            setWinnerMessage('Bust! You exceeded the maximum number of cards.');
+            revealDealerHand();
+            return;
+        }
 
         try {
             const response = await dealCard();
@@ -60,6 +68,7 @@ const GameBoard = () => {
             const newScore = calculateScore(newHand);
             if (newScore > 21) {
                 setGameState('PLAYER_BUST');
+                setWinnerMessage('Bust! You went over 21.');
                 revealDealerHand();
             }
         } catch (error) {
@@ -70,64 +79,36 @@ const GameBoard = () => {
     const handleStand = async () => {
         if (gameState !== 'PLAYING') return;
 
-        try {
-            const response = await getDealerHand();
-            setDealerHand(response.data);
-            setShowDealerHand(true);
+        setShowDealerHand(true);
 
-            let currentDealerScore = calculateScore(response.data);
-            while (currentDealerScore < 17) {
-                const cardResponse = await dealCardToDealer();
-                if (cardResponse.data.error) {
-                    console.error('Deck is empty:', cardResponse.data.error);
-                    setGameState('DEALER_WIN');
-                    return;
-                }
+        let dealerFinalHand = [...dealerHand];
+        let dealerFinalScore = calculateScore(dealerFinalHand);
 
-                const newHand = [...dealerHand, cardResponse.data];
-                setDealerHand(newHand);
-                currentDealerScore = calculateScore(newHand);
-
-                if (currentDealerScore >= 17) {
-                    break;
-                }
-
-                if (currentDealerScore > 21) {
-                    setGameState('DEALER_BUST');
-                    return;
-                }
+        while (dealerFinalScore < 17) {
+            const cardResponse = await dealCardToDealer();
+            if (cardResponse.data.error) {
+                setGameState('DEALER_WIN');
+                setWinnerMessage('Player Wins! Dealer ran out of cards.');
+                return;
             }
 
-            determineWinner();
-        } catch (error) {
-            console.error('Error during stand action:', error);
-        }
-    };
+            dealerFinalHand = [...dealerFinalHand, cardResponse.data];
+            dealerFinalScore = calculateScore(dealerFinalHand);
 
-    const revealDealerHand = async () => {
-        try {
-            const response = await getDealerHand();
-            setDealerHand(response.data);
-            setShowDealerHand(true);
-        } catch (error) {
-            console.error('Error revealing dealer hand:', error);
+            if (dealerFinalScore >= 17 || dealerFinalScore > 21) {
+                break;
+            }
         }
+
+        setDealerHand(dealerFinalHand);
+        determineWinner(dealerFinalScore);
     };
 
     const calculateScore = (hand) => {
-        if (!Array.isArray(hand)) {
-            console.error('Expected an array for hand, but got:', hand);
-            return 0;
-        }
-
         let total = 0;
         let aces = 0;
         hand.forEach(card => {
-            if (card && typeof card.value === 'number') {
-                total += card.value;
-            } else {
-                console.warn('Invalid card or card value:', card);
-            }
+            total += card.value;
             if (card.rank === 'A') aces += 1;
         });
 
@@ -135,48 +116,53 @@ const GameBoard = () => {
             total -= 10;
             aces -= 1;
         }
-
         return total;
     };
 
-    const determineWinner = () => {
+    const determineWinner = (dealerFinalScore) => {
         const playerFinalScore = calculateScore(playerHand);
-        const dealerFinalScore = calculateScore(dealerHand);
 
         if (playerFinalScore > 21) {
             setGameState('PLAYER_BUST');
+            setWinnerMessage('Dealer Wins! You went over 21.');
         } else if (dealerFinalScore > 21) {
             setGameState('DEALER_BUST');
+            setWinnerMessage('Player Wins! Dealer went over 21.');
         } else if (playerFinalScore > dealerFinalScore) {
             setGameState('PLAYER_WIN');
+            setWinnerMessage('Congratulations! You won!');
         } else if (playerFinalScore < dealerFinalScore) {
             setGameState('DEALER_WIN');
+            setWinnerMessage('Dealer Wins! Better luck next time.');
         } else {
             setGameState('TIE');
+            setWinnerMessage("It's a tie!");
         }
     };
 
     return (
-        <div>
-            <h1>Blackjack</h1>
-            <h3>Player's Score: {playerScore}</h3>
-            <Hand cards={Array.isArray(playerHand) ? playerHand : []} owner="Player" />
+        <div className="game-container">
+            <h1 className="game-title">Blackjack</h1>
+            <div className="player-dealer-container">
+                <div className="player-section">
+                    <h2>Player's Score: {playerScore}</h2>
+                    <Hand cards={playerHand} owner="Player" />
+                </div>
+                <div className="dealer-section">
+                    <h2>Dealer's Score: {showDealerHand ? dealerScore : 'Hidden'}</h2>
+                    <Hand cards={showDealerHand ? dealerHand : [dealerHand[0]]} owner="Dealer" />
+                </div>
+            </div>
 
-            {showDealerHand && <h3>Dealer's Score: {dealerScore}</h3>}
-            <Hand cards={showDealerHand ? dealerHand : [dealerHand[0]]} owner="Dealer" />
+            {winnerMessage && <h3 className="winner-message">{winnerMessage}</h3>}
 
-            <ButtonContainer>
-                {gameState === 'READY' && (
-                    <Button variant="contained" color="primary" onClick={handleStartGame}>
-                        Start Game
-                    </Button>
-                )}
+            <div className="button-container">
                 {gameState === 'PLAYING' && (
                     <>
-                        <Button variant="outlined" color="secondary" onClick={handleHit}>
+                        <Button variant="contained" color="secondary" onClick={handleHit}>
                             Hit
                         </Button>
-                        <Button variant="outlined" color="secondary" onClick={handleStand}>
+                        <Button variant="contained" color="secondary" onClick={handleStand}>
                             Stand
                         </Button>
                     </>
@@ -186,16 +172,7 @@ const GameBoard = () => {
                         Play Again
                     </Button>
                 )}
-            </ButtonContainer>
-            {gameState !== 'PLAYING' && (
-                <div className="game-result">
-                    {gameState === 'PLAYER_WIN' && <h2>Player Wins!</h2>}
-                    {gameState === 'DEALER_WIN' && <h2>Dealer Wins!</h2>}
-                    {gameState === 'PLAYER_BUST' && <h2>Player Busts! Dealer Wins!</h2>}
-                    {gameState === 'DEALER_BUST' && <h2>Dealer Busts! Player Wins!</h2>}
-                    {gameState === 'TIE' && <h2>It's a Tie!</h2>}
-                </div>
-            )}
+            </div>
         </div>
     );
 };
