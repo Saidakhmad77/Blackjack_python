@@ -23,6 +23,7 @@ const GameBoard = () => {
             const score = calculateScore(playerHand);
             setPlayerScore(score);
 
+            // If player score exceeds 21, end game and declare dealer as winner
             if (score > 21) {
                 setGameState('PLAYER_BUST');
                 setWinnerMessage('Dealer Wins! You went over 21.');
@@ -68,7 +69,7 @@ const GameBoard = () => {
             const newScore = calculateScore(newHand);
             if (newScore > 21) {
                 setGameState('PLAYER_BUST');
-                setWinnerMessage('Bust! You went over 21.');
+                setWinnerMessage('Dealer Wins! You went over 21.');
                 revealDealerHand();
             }
         } catch (error) {
